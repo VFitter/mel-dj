@@ -76,6 +76,7 @@ export function RadioProvider({ children }: { children: ReactNode }) {
   const [currentAd, setCurrentAd] = useState<RadioAd | null>(null);
   const [isAdPlaying, setIsAdPlaying] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [hydrated, setHydrated] = useState(false);
   const [queueVersion, setQueueVersion] = useState(0);
   const [playbackSync, setPlaybackSync] = useState<PlaybackSyncRequest | null>(null);
   const [dockTarget, setDockTargetState] = useState<HTMLElement | null>(null);
@@ -173,6 +174,10 @@ export function RadioProvider({ children }: { children: ReactNode }) {
   }, [applyState]);
 
   useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
 
     const runPoll = async () => {
@@ -233,12 +238,12 @@ export function RadioProvider({ children }: { children: ReactNode }) {
   return (
     <RadioContext.Provider
       value={{
-        currentTrack,
-        currentAd,
-        isAdPlaying,
-        loading,
+        currentTrack: hydrated ? currentTrack : null,
+        currentAd: hydrated ? currentAd : null,
+        isAdPlaying: hydrated ? isAdPlaying : false,
+        loading: !hydrated || loading,
         queueVersion,
-        playbackSync,
+        playbackSync: hydrated ? playbackSync : null,
         refreshQueue,
         resyncPlayback,
         handleVideoEnd,

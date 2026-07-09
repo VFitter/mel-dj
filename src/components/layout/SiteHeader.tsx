@@ -19,11 +19,22 @@ interface SiteHeaderProps {
   locale?: Locale;
 }
 
+const menuCopy = {
+  en: { open: "Open menu", close: "Close menu" },
+  fr: { open: "Ouvrir le menu", close: "Fermer le menu" },
+} as const;
+
 export default function SiteHeader({ nav, locale = "en" }: SiteHeaderProps) {
   const pathname = usePathname();
   const menuId = useId();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
   const items = nav ?? navItems[locale];
+  const menuLabels = menuCopy[locale];
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -39,6 +50,9 @@ export default function SiteHeader({ nav, locale = "en" }: SiteHeaderProps) {
       document.body.style.overflow = previousOverflow;
     };
   }, [menuOpen]);
+
+  const isNavActive = (href: string, itemHref: string) =>
+    hasMounted && (pathname === href || (itemHref !== "/" && pathname.startsWith(href)));
 
   const linkClassName = (active: boolean) =>
     cn(
@@ -71,7 +85,7 @@ export default function SiteHeader({ nav, locale = "en" }: SiteHeaderProps) {
         <nav className="hidden md:flex items-center gap-1 text-sm">
           {items.map((item) => {
             const href = localePath(item.href, locale);
-            const active = pathname === href || (item.href !== "/" && pathname.startsWith(href));
+            const active = isNavActive(href, item.href);
             return (
               <Link key={item.href} href={href} className={linkClassName(active)}>
                 {item.label}
@@ -101,7 +115,7 @@ export default function SiteHeader({ nav, locale = "en" }: SiteHeaderProps) {
             className="inline-flex items-center justify-center min-h-11 min-w-11 rounded-lg text-text-secondary hover:text-text-primary hover:bg-surface-overlay transition-colors"
             aria-expanded={menuOpen}
             aria-controls={menuId}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-label={menuOpen ? menuLabels.close : menuLabels.open}
             onClick={() => setMenuOpen((open) => !open)}
           >
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -117,7 +131,7 @@ export default function SiteHeader({ nav, locale = "en" }: SiteHeaderProps) {
           <div className="flex flex-col gap-1 p-4 pb-[calc(var(--player-bar-height)+env(safe-area-inset-bottom,0px)+1rem)]">
             {items.map((item) => {
               const href = localePath(item.href, locale);
-              const active = pathname === href || (item.href !== "/" && pathname.startsWith(href));
+              const active = isNavActive(href, item.href);
               return (
                 <Link
                   key={item.href}

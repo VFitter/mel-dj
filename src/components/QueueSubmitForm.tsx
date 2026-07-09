@@ -178,7 +178,7 @@ export default function QueueSubmitForm({
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-text-primary">{t.title}</p>
-            <Text variant="caption" className="mt-0.5">
+            <Text as="span" variant="caption" className="mt-0.5">
               {t.subtitle}
             </Text>
           </div>

@@ -79,7 +79,7 @@ function QueueList({
               />
               <div className="flex-1 min-w-0">
                 <p className="text-text-primary text-xs font-medium truncate">{item.track?.title || "Unknown"}</p>
-                <Text variant="caption" className="truncate">{item.track?.artist}</Text>
+                <Text as="span" variant="caption" className="truncate">{item.track?.artist}</Text>
               </div>
             </>
           ) : (

@@ -71,7 +71,7 @@ export default function HomeContent({ locale = "en" }: HomeContentProps) {
         </div>
       </div>
 
-      <PlayerBar track={currentTrack} isAdPlaying={isAdPlaying} />
+      <PlayerBar track={currentTrack} isAdPlaying={isAdPlaying} locale={locale} />
     </PageShell>
   );
 }

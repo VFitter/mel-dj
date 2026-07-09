@@ -3,6 +3,28 @@
 import { SkipForward, Play, ExternalLink, Megaphone } from "lucide-react";
 import { IconButton, Badge, Text } from "@/components/ui";
 import { cn } from "@/lib/cn";
+import { localePath, type Locale } from "@/lib/i18n";
+
+const copy = {
+  en: {
+    advertiseLabel: "Advertise on MEL Radio",
+    advertiseTitle: "Advertise Here",
+    advertiseShort: "Ads",
+    noTrack: "No track playing",
+    addTracks: "Add tracks in admin",
+    advertisement: "Advertisement",
+    skip: "Skip",
+  },
+  fr: {
+    advertiseLabel: "Faites de la publicité sur MEL Radio",
+    advertiseTitle: "Publicité ici",
+    advertiseShort: "Pub",
+    noTrack: "Aucune piste en cours",
+    addTracks: "Ajoutez des pistes dans l'admin",
+    advertisement: "Publicité",
+    skip: "Passer",
+  },
+} as const;
 
 interface PlayerBarProps {
   track: {
@@ -13,28 +35,37 @@ interface PlayerBarProps {
   } | null;
   isAdPlaying: boolean;
   onSkip?: () => void;
+  locale?: Locale;
 }
 
-function AdvertiseLink({ compact = false }: { compact?: boolean }) {
+function AdvertiseLink({
+  compact = false,
+  locale = "en",
+}: {
+  compact?: boolean;
+  locale?: Locale;
+}) {
+  const t = copy[locale];
+
   return (
     <a
-      href="/pricing"
+      href={localePath("/pricing", locale)}
       className={cn(
         "inline-flex items-center justify-center gap-1 font-medium rounded-md bg-brand-primary hover:bg-brand-primary-hover text-white shadow-glow transition-all touch-target",
         compact
           ? "h-9 w-9 p-0 max-[220px]:h-8 max-[220px]:w-8"
           : "h-9 px-3 text-xs ml-1 sm:ml-2",
       )}
-      aria-label="Advertise on MEL Radio"
-      title="Advertise Here"
+      aria-label={t.advertiseLabel}
+      title={t.advertiseTitle}
     >
       {compact ? (
         <Megaphone className="h-4 w-4" />
       ) : (
         <>
           <Megaphone className="h-4 w-4 max-[220px]:inline hidden sm:hidden" />
-          <span className="hidden sm:inline">Advertise Here</span>
-          <span className="sm:hidden max-[220px]:hidden">Ads</span>
+          <span className="hidden sm:inline">{t.advertiseTitle}</span>
+          <span className="sm:hidden max-[220px]:hidden">{t.advertiseShort}</span>
           <ExternalLink className="h-3 w-3 hidden sm:inline" />
         </>
       )}
@@ -42,7 +73,8 @@ function AdvertiseLink({ compact = false }: { compact?: boolean }) {
   );
 }
 
-export default function PlayerBar({ track, isAdPlaying, onSkip }: PlayerBarProps) {
+export default function PlayerBar({ track, isAdPlaying, onSkip, locale = "en" }: PlayerBarProps) {
+  const t = copy[locale];
   const barClass = cn(
     "fixed bottom-0 left-0 right-0 z-[var(--z-player)]",
     "pb-[calc(var(--safe-bottom))]",
@@ -63,14 +95,14 @@ export default function PlayerBar({ track, isAdPlaying, onSkip }: PlayerBarProps
             </div>
             <div className="min-w-0">
               <Text variant="secondary" className="text-xs sm:text-sm truncate">
-                No track playing
+                {t.noTrack}
               </Text>
               <Text variant="caption" className="truncate max-[220px]:hidden">
-                Add tracks in admin
+                {t.addTracks}
               </Text>
             </div>
           </div>
-          <AdvertiseLink compact={false} />
+          <AdvertiseLink compact={false} locale={locale} />
         </div>
       </div>
     );
@@ -98,7 +130,7 @@ export default function PlayerBar({ track, isAdPlaying, onSkip }: PlayerBarProps
           )}
           <div className="min-w-0">
             {isAdPlaying ? (
-              <Text className="text-warning text-xs sm:text-sm font-medium truncate">Advertisement</Text>
+              <Text className="text-warning text-xs sm:text-sm font-medium truncate">{t.advertisement}</Text>
             ) : (
               track && (
                 <>
@@ -112,11 +144,11 @@ export default function PlayerBar({ track, isAdPlaying, onSkip }: PlayerBarProps
 
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           {!isAdPlaying && onSkip && (
-            <IconButton onClick={onSkip} label="Skip" size="md" className="touch-target">
+            <IconButton onClick={onSkip} label={t.skip} size="md" className="touch-target">
               <SkipForward className="h-5 w-5" />
             </IconButton>
           )}
-          <AdvertiseLink compact={false} />
+          <AdvertiseLink compact={false} locale={locale} />
         </div>
       </div>
     </div>
