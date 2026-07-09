@@ -26,9 +26,9 @@ export default function AdminMessagesPage() {
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-6">
-        <Mail className="h-6 w-6 text-blue-400" />
-        <h1 className="text-2xl font-bold text-white">Contact Messages</h1>
+      <div className="hidden lg:flex items-center gap-3 mb-4 sm:mb-6">
+        <Mail className="h-6 w-6 text-blue-400 shrink-0" />
+        <h1 className="text-xl sm:text-2xl font-bold text-white">Contact Messages</h1>
       </div>
 
       {loading ? (
@@ -46,7 +46,9 @@ export default function AdminMessagesPage() {
               <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
                 <div className="flex items-center gap-2">
                   <span className="text-white font-medium">{m.name}</span>
-                  <a href={`mailto:${m.email}`} className="text-blue-400 text-sm hover:underline">{m.email}</a>
+                  {m.email ? (
+                    <a href={`mailto:${m.email}`} className="text-blue-400 text-sm hover:underline">{m.email}</a>
+                  ) : null}
                 </div>
                 <span className="text-xs text-zinc-500">{new Date(m.createdAt).toLocaleString()}</span>
               </div>

@@ -13,16 +13,20 @@ type PlayerState = -1 | 0 | 1 | 2 | 3 | 5;
 
 interface UseYouTubePlayerOptions {
   onVideoEnd: () => void;
+  onPlaybackResume?: () => void;
   onReady?: () => void;
 }
 
-export function useYouTubePlayer({ onVideoEnd, onReady }: UseYouTubePlayerOptions) {
+export function useYouTubePlayer({ onVideoEnd, onPlaybackResume, onReady }: UseYouTubePlayerOptions) {
   const playerRef = useRef<YT.Player | null>(null);
   const [isReady, setIsReady] = useState(false);
   const onVideoEndRef = useRef(onVideoEnd);
   onVideoEndRef.current = onVideoEnd;
+  const onPlaybackResumeRef = useRef(onPlaybackResume);
+  onPlaybackResumeRef.current = onPlaybackResume;
   const onReadyRef = useRef(onReady);
   onReadyRef.current = onReady;
+  const lastStateRef = useRef<PlayerState | null>(null);
 
   useEffect(() => {
     if (!window.YT) {
@@ -53,12 +57,23 @@ export function useYouTubePlayer({ onVideoEnd, onReady }: UseYouTubePlayerOption
             onReadyRef.current?.();
           },
           onStateChange: (event: YT.OnStateChangeEvent) => {
-            if (event.data === YT.PlayerState.ENDED) {
+            const state = event.data as PlayerState;
+
+            if (
+              state === YT.PlayerState.PLAYING &&
+              lastStateRef.current === YT.PlayerState.PAUSED
+            ) {
+              onPlaybackResumeRef.current?.();
+            }
+
+            if (state === YT.PlayerState.ENDED) {
               const player = event.target;
               if (player && player.getCurrentTime() > 0.5) {
                 onVideoEndRef.current();
               }
             }
+
+            lastStateRef.current = state;
           },
         },
       });
@@ -75,15 +90,23 @@ export function useYouTubePlayer({ onVideoEnd, onReady }: UseYouTubePlayerOption
     };
   }, []);
 
-  const loadVideo = useCallback((videoId: string) => {
-    if (playerRef.current) {
-      playerRef.current.loadVideoById(videoId);
+  const loadVideoAt = useCallback((videoId: string, startSeconds = 0) => {
+    if (!playerRef.current) return;
+
+    if (startSeconds > 0) {
+      playerRef.current.loadVideoById({
+        videoId,
+        startSeconds,
+      });
+      return;
     }
+
+    playerRef.current.loadVideoById(videoId);
   }, []);
 
   const pause = useCallback(() => {
     playerRef.current?.pauseVideo();
   }, []);
 
-  return { isReady, loadVideo, pause };
+  return { isReady, loadVideoAt, pause };
 }

@@ -1,12 +1,51 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
+import { Button, Card, CardContent, FormField, Input, Select, Textarea, Heading, Text } from "@/components/ui";
+import type { Locale } from "@/lib/i18n";
 
-export default function ContactForm() {
+const copy = {
+  en: {
+    defaultSubject: "Advertising inquiry",
+    subjects: ["Advertising inquiry", "Partnership opportunity", "General question", "Report an issue"],
+    name: "Name",
+    namePlaceholder: "Your name",
+    subject: "Subject",
+    message: "Message",
+    messagePlaceholder: "Tell us about your advertising needs...",
+    errorGeneric: "Something went wrong. Please try again.",
+    errorNetwork: "Network error. Please try again.",
+    sentTitle: "Message sent!",
+    sentBody: "Thanks for reaching out — we'll get back to you within 24 hours.",
+    sending: "Sending...",
+    send: "Send Message",
+  },
+  fr: {
+    defaultSubject: "Demande publicitaire",
+    subjects: ["Demande publicitaire", "Opportunité de partenariat", "Question générale", "Signaler un problème"],
+    name: "Nom",
+    namePlaceholder: "Votre nom",
+    subject: "Sujet",
+    message: "Message",
+    messagePlaceholder: "Parlez-nous de vos besoins publicitaires...",
+    errorGeneric: "Une erreur s'est produite. Veuillez réessayer.",
+    errorNetwork: "Erreur réseau. Veuillez réessayer.",
+    sentTitle: "Message envoyé !",
+    sentBody: "Merci de nous avoir contactés — nous vous répondrons sous 24 heures.",
+    sending: "Envoi en cours...",
+    send: "Envoyer le message",
+  },
+} as const;
+
+interface ContactFormProps {
+  locale?: Locale;
+}
+
+export default function ContactForm({ locale = "en" }: ContactFormProps) {
+  const t = copy[locale];
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [subject, setSubject] = useState("Advertising inquiry");
+  const [subject, setSubject] = useState<string>(t.defaultSubject);
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -19,90 +58,71 @@ export default function ContactForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, subject, message }),
+        body: JSON.stringify({ name, subject, message }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Something went wrong. Please try again.");
+        setError(data.error || t.errorGeneric);
         setStatus("error");
         return;
       }
       setStatus("sent");
     } catch {
-      setError("Network error. Please try again.");
+      setError(t.errorNetwork);
       setStatus("error");
     }
   }
 
   if (status === "sent") {
     return (
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-8 text-center">
-        <CheckCircle2 className="h-10 w-10 text-green-400 mx-auto mb-4" />
-        <h2 className="text-white font-semibold text-lg mb-1">Message sent!</h2>
-        <p className="text-zinc-400 text-sm">Thanks for reaching out — we&apos;ll get back to you within 24 hours.</p>
-      </div>
+      <Card variant="glass" className="text-center p-8 animate-fade-in">
+        <CardContent>
+          <CheckCircle2 className="h-10 w-10 text-success mx-auto mb-4" />
+          <Heading as="h2" size="sm" className="mb-1">{t.sentTitle}</Heading>
+          <Text variant="secondary">{t.sentBody}</Text>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm text-zinc-400 mb-1">Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
-            placeholder="Your name"
-          />
-        </div>
-        <div>
-          <label className="block text-sm text-zinc-400 mb-1">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
-            placeholder="you@example.com"
-          />
-        </div>
-      </div>
-      <div>
-        <label className="block text-sm text-zinc-400 mb-1">Subject</label>
-        <select
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
-        >
-          <option>Advertising inquiry</option>
-          <option>Partnership opportunity</option>
-          <option>General question</option>
-          <option>Report an issue</option>
-        </select>
-      </div>
-      <div>
-        <label className="block text-sm text-zinc-400 mb-1">Message</label>
-        <textarea
-          rows={5}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          required
-          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
-          placeholder="Tell us about your advertising needs..."
-        />
-      </div>
-      {error && <p className="text-sm text-red-400">{error}</p>}
-      <button
-        type="submit"
-        disabled={status === "sending"}
-        className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium px-4 py-2 rounded-lg text-sm transition-colors inline-flex items-center gap-2"
-      >
-        {status === "sending" && <Loader2 className="h-4 w-4 animate-spin" />}
-        {status === "sending" ? "Sending..." : "Send Message"}
-      </button>
-    </form>
+    <Card variant="glass">
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <FormField label={t.name} htmlFor="name" required>
+            <Input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              placeholder={t.namePlaceholder}
+              error={!!error}
+            />
+          </FormField>
+          <FormField label={t.subject} htmlFor="subject">
+            <Select id="subject" value={subject} onChange={(e) => setSubject(e.target.value)}>
+              {t.subjects.map((option) => (
+                <option key={option}>{option}</option>
+              ))}
+            </Select>
+          </FormField>
+          <FormField label={t.message} htmlFor="message" required>
+            <Textarea
+              id="message"
+              rows={5}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              required
+              placeholder={t.messagePlaceholder}
+            />
+          </FormField>
+          {error && <Text variant="secondary" className="text-error text-sm">{error}</Text>}
+          <Button type="submit" loading={status === "sending"} className="w-full sm:w-auto">
+            {status === "sending" ? t.sending : t.send}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

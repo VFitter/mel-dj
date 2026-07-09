@@ -60,9 +60,9 @@ export default function AdminAds() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">Ads & Pricing</h1>
-        <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-white hidden lg:block">Ads & Pricing</h1>
+        <button onClick={() => setShowForm(!showForm)} className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2.5 rounded-lg text-sm w-full sm:w-auto">
           <Plus className="h-4 w-4" />
           New Campaign
         </button>
@@ -71,7 +71,7 @@ export default function AdminAds() {
       {showForm && (
         <form onSubmit={createCampaign} className="bg-zinc-900 rounded-xl border border-zinc-800 p-4 mb-6 space-y-3">
           <h2 className="text-sm font-semibold text-zinc-300">New Ad Campaign</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input
               placeholder="Advertiser Name" required
               value={form.advertiserName} onChange={e => setForm({ ...form, advertiserName: e.target.value })}
@@ -92,18 +92,18 @@ export default function AdminAds() {
               value={form.websiteUrl} onChange={e => setForm({ ...form, websiteUrl: e.target.value })}
               className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
             />
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 sm:col-span-2">
               <input type="date" required value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })}
-                className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+                className="flex-1 min-w-0 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
               />
               <input type="date" value={form.endDate} onChange={e => setForm({ ...form, endDate: e.target.value })}
-                className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+                className="flex-1 min-w-0 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
-          <div className="flex gap-2 justify-end">
-            <button type="button" onClick={() => setShowForm(false)} className="text-zinc-400 px-3 py-2 text-sm">Cancel</button>
-            <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">Create Campaign</button>
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
+            <button type="button" onClick={() => setShowForm(false)} className="text-zinc-400 px-3 py-2.5 text-sm rounded-lg hover:bg-zinc-800">Cancel</button>
+            <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm">Create Campaign</button>
           </div>
         </form>
       )}

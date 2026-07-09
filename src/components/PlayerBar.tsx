@@ -1,6 +1,8 @@
 "use client";
 
-import { Play, Pause, SkipForward, Volume2, ExternalLink } from "lucide-react";
+import { SkipForward, Play, ExternalLink, Megaphone } from "lucide-react";
+import { IconButton, Badge, Text } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 interface PlayerBarProps {
   track: {
@@ -13,70 +15,108 @@ interface PlayerBarProps {
   onSkip?: () => void;
 }
 
+function AdvertiseLink({ compact = false }: { compact?: boolean }) {
+  return (
+    <a
+      href="/pricing"
+      className={cn(
+        "inline-flex items-center justify-center gap-1 font-medium rounded-md bg-brand-primary hover:bg-brand-primary-hover text-white shadow-glow transition-all touch-target",
+        compact
+          ? "h-9 w-9 p-0 max-[220px]:h-8 max-[220px]:w-8"
+          : "h-9 px-3 text-xs ml-1 sm:ml-2",
+      )}
+      aria-label="Advertise on MEL Radio"
+      title="Advertise Here"
+    >
+      {compact ? (
+        <Megaphone className="h-4 w-4" />
+      ) : (
+        <>
+          <Megaphone className="h-4 w-4 max-[220px]:inline hidden sm:hidden" />
+          <span className="hidden sm:inline">Advertise Here</span>
+          <span className="sm:hidden max-[220px]:hidden">Ads</span>
+          <ExternalLink className="h-3 w-3 hidden sm:inline" />
+        </>
+      )}
+    </a>
+  );
+}
+
 export default function PlayerBar({ track, isAdPlaying, onSkip }: PlayerBarProps) {
+  const barClass = cn(
+    "fixed bottom-0 left-0 right-0 z-[var(--z-player)]",
+    "pb-[calc(var(--safe-bottom))]",
+    "bg-surface-glass backdrop-blur-lg backdrop-saturate-150 border-t border-border",
+    isAdPlaying && "border-warning/30",
+  );
+
   if (!track && !isAdPlaying) {
     return (
-      <div className="fixed bottom-0 left-0 right-0 bg-zinc-900 border-t border-zinc-800 px-4 py-3 z-50">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-zinc-800 rounded flex items-center justify-center">
-              <Play className="h-5 w-5 text-zinc-600" />
+      <div className={barClass}>
+        <div
+          className="max-w-7xl mx-auto flex items-center justify-between gap-2 px-safe"
+          style={{ minHeight: "var(--player-bar-height)" }}
+        >
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-surface-overlay rounded-lg flex items-center justify-center flex-shrink-0">
+              <Play className="h-4 w-4 sm:h-5 sm:w-5 text-text-muted" />
             </div>
-            <div>
-              <p className="text-zinc-500 text-sm">No track playing</p>
-              <p className="text-zinc-600 text-xs">Add tracks in admin</p>
+            <div className="min-w-0">
+              <Text variant="secondary" className="text-xs sm:text-sm truncate">
+                No track playing
+              </Text>
+              <Text variant="caption" className="truncate max-[220px]:hidden">
+                Add tracks in admin
+              </Text>
             </div>
           </div>
-          <a href="/pricing" className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1">
-            Advertise Here
-            <ExternalLink className="h-3 w-3" />
-          </a>
+          <AdvertiseLink compact={false} />
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`fixed bottom-0 left-0 right-0 border-t px-4 py-3 z-50 ${
-      isAdPlaying ? "bg-yellow-900/30 border-yellow-600/30" : "bg-zinc-900/95 border-zinc-800 backdrop-blur"
-    }`}>
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
+    <div className={barClass}>
+      <div
+        className="max-w-7xl mx-auto flex items-center justify-between gap-2 px-safe"
+        style={{ minHeight: "var(--player-bar-height)" }}
+      >
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           {isAdPlaying ? (
-            <div className="w-10 h-10 rounded bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-yellow-400 text-xs font-bold">AD</span>
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-warning/20 flex items-center justify-center flex-shrink-0">
+              <Badge variant="warning">AD</Badge>
             </div>
-          ) : track && (
-            <img
-              src={track.thumbnailUrl || `https://i.ytimg.com/vi/${track.youtubeId}/hqdefault.jpg`}
-              alt=""
-              className="w-10 h-10 rounded object-cover flex-shrink-0"
-            />
+          ) : (
+            track && (
+              <img
+                src={track.thumbnailUrl || `https://i.ytimg.com/vi/${track.youtubeId}/hqdefault.jpg`}
+                alt=""
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg object-cover flex-shrink-0 ring-1 ring-border"
+              />
+            )
           )}
           <div className="min-w-0">
             {isAdPlaying ? (
-              <p className="text-yellow-400 text-sm font-medium">Advertisement</p>
-            ) : track && (
-              <>
-                <p className="text-white text-sm font-medium truncate">{track.title}</p>
-                <p className="text-zinc-400 text-xs truncate">{track.artist}</p>
-              </>
+              <Text className="text-warning text-xs sm:text-sm font-medium truncate">Advertisement</Text>
+            ) : (
+              track && (
+                <>
+                  <p className="text-text-primary text-xs sm:text-sm font-medium line-clamp-1">{track.title}</p>
+                  <Text variant="caption" className="truncate">{track.artist}</Text>
+                </>
+              )
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           {!isAdPlaying && onSkip && (
-            <button onClick={onSkip} className="text-zinc-400 hover:text-white p-2" title="Skip">
+            <IconButton onClick={onSkip} label="Skip" size="md" className="touch-target">
               <SkipForward className="h-5 w-5" />
-            </button>
+            </IconButton>
           )}
-          <a
-            href="/pricing"
-            className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors ml-2"
-          >
-            Advertise Here
-          </a>
+          <AdvertiseLink compact={false} />
         </div>
       </div>
     </div>

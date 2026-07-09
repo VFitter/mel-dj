@@ -23,7 +23,17 @@ function createDb(): BetterSQLite3Database<typeof schema> {
     CREATE TABLE IF NOT EXISTS queue (id INTEGER PRIMARY KEY AUTOINCREMENT, position REAL NOT NULL, type TEXT NOT NULL CHECK(type IN ('track','ad')), track_id INTEGER REFERENCES tracks(id) ON DELETE SET NULL, ad_campaign_id INTEGER REFERENCES ad_campaigns(id) ON DELETE SET NULL, status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','playing','played')), created_at INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS play_history (id INTEGER PRIMARY KEY AUTOINCREMENT, track_id INTEGER REFERENCES tracks(id) ON DELETE SET NULL, queue_id INTEGER, was_ad_slot INTEGER NOT NULL DEFAULT 0, ad_campaign_id INTEGER, played_at INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS contact_messages (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, email TEXT NOT NULL, subject TEXT NOT NULL, message TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'new' CHECK(status IN ('new','read','archived')), created_at INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS queue_submissions (id INTEGER PRIMARY KEY AUTOINCREMENT, device_id TEXT NOT NULL, ip_hash TEXT NOT NULL, track_id INTEGER REFERENCES tracks(id) ON DELETE SET NULL, queue_id INTEGER, youtube_id TEXT NOT NULL, submitted_at INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS visitors (id INTEGER PRIMARY KEY AUTOINCREMENT, device_id TEXT NOT NULL UNIQUE, ip_address TEXT NOT NULL, latitude REAL, longitude REAL, city TEXT, region TEXT, country TEXT, user_agent TEXT, last_path TEXT, first_seen_at INTEGER NOT NULL, last_seen_at INTEGER NOT NULL);
+    CREATE INDEX IF NOT EXISTS queue_submissions_device_time_idx ON queue_submissions(device_id, submitted_at);
+    CREATE INDEX IF NOT EXISTS queue_submissions_ip_time_idx ON queue_submissions(ip_hash, submitted_at);
+    CREATE INDEX IF NOT EXISTS visitors_last_seen_idx ON visitors(last_seen_at);
   `);
+
+  const queueColumns = sqlite.prepare("PRAGMA table_info(queue)").all() as { name: string }[];
+  if (!queueColumns.some((column) => column.name === "started_at")) {
+    sqlite.exec(`ALTER TABLE queue ADD COLUMN started_at INTEGER`);
+  }
 
   const adminUsername = process.env.ADMIN_USERNAME || "MelGang";
   const admin = _db.select().from(schema.users).where(eq(schema.users.username, adminUsername)).get();

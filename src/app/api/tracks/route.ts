@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { tracks, users, queue } from "@/db/schema";
 import { eq, inArray, sql } from "drizzle-orm";
 import { extractYouTubeId, fetchYouTubeMeta } from "@/lib/youtube";
-import { ensureQueueFilled } from "@/lib/queue-engine";
+import { ensureQueueFilled, prioritizeNewTrack } from "@/lib/queue-engine";
 
 export async function GET(req: NextRequest) {
   const isStats = req.nextUrl.searchParams.get("stats");
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Admin user not found" }, { status: 500 });
   }
 
-  db.insert(tracks).values({
+  const newTrack = db.insert(tracks).values({
     youtubeUrl: url,
     youtubeId: videoId,
     title: meta.title,
@@ -65,8 +65,9 @@ export async function POST(req: NextRequest) {
     durationSeconds: meta.durationSeconds,
     thumbnailUrl: meta.thumbnailUrl,
     addedBy: admin.id,
-  }).run();
+  }).returning().get();
 
+  prioritizeNewTrack(newTrack.id);
   await ensureQueueFilled();
 
   return NextResponse.json({ success: true });

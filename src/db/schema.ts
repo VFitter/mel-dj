@@ -63,6 +63,7 @@ export const queue = sqliteTable("queue", {
   trackId: integer("track_id", { mode: "number" }).references(() => tracks.id, { onDelete: "set null" }),
   adCampaignId: integer("ad_campaign_id", { mode: "number" }).references(() => adCampaigns.id, { onDelete: "set null" }),
   status: text("status", { enum: ["pending", "playing", "played"] }).notNull().default("pending"),
+  startedAt: integer("started_at", { mode: "number" }),
   createdAt: integer("created_at", { mode: "number" }).notNull().$defaultFn(() => Date.now()),
 }, (t) => ({
   positionIdx: index("queue_position_idx").on(t.position),
@@ -78,6 +79,36 @@ export const playHistory = sqliteTable("play_history", {
   playedAt: integer("played_at", { mode: "number" }).notNull().$defaultFn(() => Date.now()),
 }, (t) => ({
   playedAtIdx: index("play_history_played_at_idx").on(t.playedAt),
+}));
+
+export const queueSubmissions = sqliteTable("queue_submissions", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  deviceId: text("device_id").notNull(),
+  ipHash: text("ip_hash").notNull(),
+  trackId: integer("track_id", { mode: "number" }).references(() => tracks.id, { onDelete: "set null" }),
+  queueId: integer("queue_id", { mode: "number" }),
+  youtubeId: text("youtube_id").notNull(),
+  submittedAt: integer("submitted_at", { mode: "number" }).notNull().$defaultFn(() => Date.now()),
+}, (t) => ({
+  deviceTimeIdx: index("queue_submissions_device_time_idx").on(t.deviceId, t.submittedAt),
+  ipTimeIdx: index("queue_submissions_ip_time_idx").on(t.ipHash, t.submittedAt),
+}));
+
+export const visitors = sqliteTable("visitors", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  deviceId: text("device_id").notNull().unique(),
+  ipAddress: text("ip_address").notNull(),
+  latitude: real("latitude"),
+  longitude: real("longitude"),
+  city: text("city"),
+  region: text("region"),
+  country: text("country"),
+  userAgent: text("user_agent"),
+  lastPath: text("last_path"),
+  firstSeenAt: integer("first_seen_at", { mode: "number" }).notNull().$defaultFn(() => Date.now()),
+  lastSeenAt: integer("last_seen_at", { mode: "number" }).notNull().$defaultFn(() => Date.now()),
+}, (t) => ({
+  lastSeenIdx: index("visitors_last_seen_idx").on(t.lastSeenAt),
 }));
 
 export const contactMessages = sqliteTable("contact_messages", {

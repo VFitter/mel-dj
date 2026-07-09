@@ -67,24 +67,24 @@ export default function AdminTracks() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-white mb-6">Tracks</h1>
+      <h1 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 hidden lg:block">Tracks</h1>
 
       <form onSubmit={addTrack} className="bg-zinc-900 rounded-xl border border-zinc-800 p-4 mb-6">
         <h2 className="text-sm font-semibold text-zinc-300 mb-3">Add YouTube Track</h2>
         {error && <p className="text-red-400 text-sm mb-2">{error}</p>}
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://youtube.com/watch?v=..."
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+            className="flex-1 min-w-0 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
             required
           />
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium"
+            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2.5 rounded-lg text-sm font-medium shrink-0"
           >
             {loading ? "Adding..." : "Add Track"}
           </button>
@@ -93,29 +93,35 @@ export default function AdminTracks() {
 
       <div className="space-y-2">
         {tracks.map((track) => (
-          <div key={track.id} className="bg-zinc-900 rounded-lg border border-zinc-800 p-3 flex items-center gap-3">
-            <img
-              src={track.thumbnailUrl || `https://i.ytimg.com/vi/${track.youtubeId}/hqdefault.jpg`}
-              alt=""
-              className="w-12 h-9 rounded object-cover flex-shrink-0"
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-medium truncate">{track.title}</p>
-              <p className="text-zinc-500 text-xs">{track.artist} · {formatDuration(track.durationSeconds)}</p>
+          <div key={track.id} className="bg-zinc-900 rounded-lg border border-zinc-800 p-3 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <img
+                src={track.thumbnailUrl || `https://i.ytimg.com/vi/${track.youtubeId}/hqdefault.jpg`}
+                alt=""
+                className="w-12 h-9 rounded object-cover flex-shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-white text-sm font-medium truncate">{track.title}</p>
+                <p className="text-zinc-500 text-xs">{track.artist} · {formatDuration(track.durationSeconds)}</p>
+              </div>
             </div>
-            <span className={`text-xs px-2 py-1 rounded-full ${
-              track.status === "active" ? "bg-green-500/20 text-green-400" :
-              track.status === "archived" ? "bg-red-500/20 text-red-400" :
-              "bg-zinc-700 text-zinc-400"
-            }`}>
-              {track.status}
-            </span>
-            <a href={track.youtubeUrl} target="_blank" className="text-zinc-500 hover:text-white p-1">
-              <ExternalLink className="h-4 w-4" />
-            </a>
-            <button onClick={() => removeTrack(track.id)} className="text-zinc-500 hover:text-red-400 p-1">
-              <Trash2 className="h-4 w-4" />
-            </button>
+            <div className="flex items-center justify-between sm:justify-end gap-2 pl-[3.75rem] sm:pl-0">
+              <span className={`text-xs px-2 py-1 rounded-full ${
+                track.status === "active" ? "bg-green-500/20 text-green-400" :
+                track.status === "archived" ? "bg-red-500/20 text-red-400" :
+                "bg-zinc-700 text-zinc-400"
+              }`}>
+                {track.status}
+              </span>
+              <div className="flex items-center gap-1">
+                <a href={track.youtubeUrl} target="_blank" className="inline-flex items-center justify-center min-h-10 min-w-10 text-zinc-500 hover:text-white rounded-lg">
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+                <button onClick={() => removeTrack(track.id)} className="inline-flex items-center justify-center min-h-10 min-w-10 text-zinc-500 hover:text-red-400 rounded-lg">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
           </div>
         ))}
         {tracks.length === 0 && (

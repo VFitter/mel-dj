@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { queue, tracks, adCampaigns } from "@/db/schema";
-import { eq, asc, isNotNull } from "drizzle-orm";
+import { eq, asc, inArray } from "drizzle-orm";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const includePlaying = req.nextUrl.searchParams.get("includePlaying") === "1";
   const items = db.select().from(queue)
-    .where(eq(queue.status, "pending"))
+    .where(
+      includePlaying
+        ? inArray(queue.status, ["pending", "playing"])
+        : eq(queue.status, "pending"),
+    )
     .orderBy(asc(queue.position))
     .all();
 

@@ -22,25 +22,25 @@ export default function AdminHistory() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-white mb-6">Play History</h1>
+      <h1 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 hidden lg:block">Play History</h1>
       <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
         <div className="divide-y divide-zinc-800">
           {history.map(item => (
-            <div key={item.id} className="p-3 flex items-center gap-3">
-              {item.wasAdSlot ? (
-                <DollarSign className="h-4 w-4 text-yellow-400 flex-shrink-0" />
-              ) : (
-                <Music className="h-4 w-4 text-blue-400 flex-shrink-0" />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-white text-sm">
+            <div key={item.id} className="p-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+              <div className="flex items-start gap-3 min-w-0 flex-1">
+                {item.wasAdSlot ? (
+                  <DollarSign className="h-4 w-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+                ) : (
+                  <Music className="h-4 w-4 text-blue-400 flex-shrink-0 mt-0.5" />
+                )}
+                <p className="text-white text-sm min-w-0">
                   {item.wasAdSlot
                     ? `Ad: ${item.adCampaign?.advertiserName || "Unknown"}`
                     : `${item.track?.title || "Unknown"} — ${item.track?.artist || ""}`
                   }
                 </p>
               </div>
-              <span className="text-xs text-zinc-500">
+              <span className="text-xs text-zinc-500 pl-7 sm:pl-0 shrink-0">
                 {new Date(item.playedAt).toLocaleString()}
               </span>
             </div>
