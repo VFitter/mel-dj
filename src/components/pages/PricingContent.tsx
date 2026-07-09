@@ -52,6 +52,32 @@ const copy = {
   },
 } as const;
 
+const tierCopy: Record<
+  Locale,
+  Record<string, { name: string; description: string }>
+> = {
+  en: {},
+  fr: {
+    "Standard Slot": {
+      name: "Emplacement standard",
+      description: "Votre publicité est diffusée après chaque 5 pistes.",
+    },
+    "Premium Slot": {
+      name: "Emplacement premium",
+      description: "Votre publicité est diffusée après chaque 3 pistes.",
+    },
+    "Featured Slot": {
+      name: "Emplacement vedette",
+      description: "Votre publicité est diffusée immédiatement après la piste en cours.",
+    },
+  },
+};
+
+function localizeTier(tier: Tier, locale: Locale): Pick<Tier, "name" | "description"> {
+  const localized = tierCopy[locale][tier.name];
+  return localized ?? { name: tier.name, description: tier.description };
+}
+
 interface PricingContentProps {
   locale?: Locale;
 }
@@ -85,18 +111,21 @@ export default function PricingContent({ locale = "en" }: PricingContentProps) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
-        {tiers.map((tier, i) => (
+        {tiers.map((tier, i) => {
+          const localized = localizeTier(tier, locale);
+          return (
           <PricingCard
             key={tier.id}
             locale={locale}
-            name={tier.name}
-            description={tier.description}
+            name={localized.name}
+            description={localized.description}
             price={tier.priceCents / 100}
             frequency={tier.slotFrequency === 1 ? t.frequencyImmediate : t.frequencyEvery(tier.slotFrequency)}
             duration={t.duration(tier.durationSeconds)}
             featured={i === 1}
           />
-        ))}
+          );
+        })}
       </div>
 
       <Card variant="glass" className="mt-8 sm:mt-12 max-w-2xl mx-auto">
